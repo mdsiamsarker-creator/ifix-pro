@@ -1,6 +1,46 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-}
+
+# iFix Pro - Warehouse Monitoring System
+
+## 🚀 Quick Start Deployment
+
+### 1. Supabase Setup (Database)
+1. Open your [Supabase SQL Editor](https://supabase.com/dashboard/project/bsmzgkacesgicujijzex/sql/new).
+2. Run the following SQL to create your tables:
+
+```sql
+create table master_inventory (
+  imei text primary key,
+  model text,
+  capacity text,
+  color text,
+  created_at timestamp with time zone default now()
+);
+
+create table repair_records (
+  id uuid primary key default gen_random_uuid(),
+  reference_no text,
+  technician text,
+  imei text,
+  services text[],
+  status text,
+  device jsonb,
+  created_at bigint,
+  received_at bigint
+);
+```
+
+### 2. Vercel Environment Variables
+Add these keys in your Vercel Project Settings:
+
+| Key | Value |
+| :--- | :--- |
+| `SUPABASE_URL` | `https://bsmzgkacesgicujijzex.supabase.co` |
+| `SUPABASE_ANON_KEY` | `your_long_anon_key_here` |
+| `API_KEY` | `AIzaSyAI-5UuHs4yvErN2o44WqCK-N2-nz1wcIw` |
+
+## 📱 Features
+- **Buy a Phone:** Bulk upload your stock directly from Excel.
+- **Repair Request:** Assign units to technicians (Ali, Erfan, etc.).
+- **Repair Receive:** Scan units back into stock with automatic status updates (Opened, Closed, Reworked).
+- **History:** Search any IMEI to see its full repair lifecycle.
+- **Data:** Export your performance reports to CSV.
