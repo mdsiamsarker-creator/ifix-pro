@@ -35,7 +35,7 @@ Add these keys in your Vercel Project Settings:
 | Key | Value |
 | :--- | :--- |
 | `SUPABASE_URL` | `https://bsmzgkacesgicujijzex.supabase.co` |
-| `SUPABASE_ANON_KEY` | `your_long_anon_key_here` |
+| `SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbXpna2FjZXNnaWN1amlqemV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NTgzOTksImV4cCI6MjA4MzAzNDM5OX0.aFnvDlmSfwPXF7CrwekbqiZXzNH0kGP91UjzB9G5VKA` |
 | `API_KEY` | `AIzaSyAI-5UuHs4yvErN2o44WqCK-N2-nz1wcIw` |
 
 ## 📱 Features
