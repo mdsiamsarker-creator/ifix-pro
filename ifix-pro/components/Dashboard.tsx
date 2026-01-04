@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Page, RepairRecord } from '../types';
 import { 
@@ -7,11 +6,12 @@ import {
   History, 
   BarChart3,
   Smartphone,
-  CheckCircle2,
   Clock,
   AlertCircle,
   ShoppingCart,
-  Loader2
+  Loader2,
+  Box,
+  Settings
 } from 'lucide-react';
 import { storageService } from '../services/storageService';
 
@@ -38,7 +38,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   }, []);
 
   const pending = records.filter(r => r.status === 'Pending').length;
-  const completed = records.filter(r => r.status !== 'Pending' && r.status !== 'Rejected').length;
 
   const menuItems = [
     { 
@@ -46,35 +45,49 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       label: 'Buy a phone', 
       icon: <ShoppingCart className="w-8 h-8" />, 
       color: 'bg-indigo-600', 
-      desc: 'Bulk upload stock (Model, GB, Color) from Excel' 
+      desc: 'Bulk upload stock from Excel' 
     },
     { 
       id: Page.RepairRequest, 
       label: 'Repair Request', 
       icon: <ClipboardList className="w-8 h-8" />, 
       color: 'bg-blue-500', 
-      desc: 'Create new repair requests for technicians' 
+      desc: 'Assign units to technicians' 
     },
     { 
       id: Page.RepairReceive, 
       label: 'Repair Receive', 
       icon: <PackageCheck className="w-8 h-8" />, 
       color: 'bg-emerald-500', 
-      desc: 'Mark repairs as received and update status' 
+      desc: 'Scan units back into stock' 
+    },
+    { 
+      id: Page.Inventory, 
+      label: 'Parts Inventory', 
+      icon: <Box className="w-8 h-8" />, 
+      color: 'bg-rose-500', 
+      desc: 'Track screens, batteries & more' 
     },
     { 
       id: Page.RepairHistory, 
-      label: 'Trace Repair History', 
+      label: 'Trace Repair', 
       icon: <History className="w-8 h-8" />, 
       color: 'bg-amber-500', 
-      desc: 'Search and track device repair timelines' 
+      desc: 'Search device repair lifecycle' 
     },
     { 
       id: Page.RepairData, 
-      label: 'Get Repair Data', 
+      label: 'Repair Data', 
       icon: <BarChart3 className="w-8 h-8" />, 
       color: 'bg-purple-500', 
-      desc: 'View warehouse analytics and reports' 
+      desc: 'Warehouse analytics & reports' 
+    },
+    { 
+      id: Page.Settings, 
+      label: 'Settings', 
+      icon: <Settings className="w-8 h-8" />, 
+      color: 'bg-slate-600', 
+      desc: 'Manage staff & services' 
     }
   ];
 
@@ -82,7 +95,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-        <p className="text-slate-500 font-medium">Syncing with Warehouse Cloud...</p>
+        <p className="text-slate-500 font-medium tracking-wide">Connecting to Warehouse Cloud...</p>
       </div>
     );
   }
@@ -91,80 +104,79 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     <div className="space-y-8 animate-fadeIn">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Warehouse Dashboard</h1>
-          <p className="text-slate-500">Real-time inventory monitoring</p>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Warehouse Dashboard</h1>
+          <p className="text-slate-500">Inventory Status & Live Operations</p>
         </div>
         <div className="flex gap-4">
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
             <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">
-              <ShoppingCart className="w-6 h-6" />
+              <Smartphone className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Stock Items</p>
-              <p className="text-xl font-bold">{stockCount}</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Total Stock</p>
+              <p className="text-xl font-bold text-indigo-600">{stockCount}</p>
             </div>
           </div>
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
+            <div className="p-3 bg-rose-100 rounded-xl text-rose-600">
               <Clock className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Pending</p>
-              <p className="text-xl font-bold">{pending}</p>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Waitlist</p>
+              <p className="text-xl font-bold text-rose-600">{pending}</p>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => onNavigate(item.id)}
-            className="group relative flex flex-col items-start p-6 bg-white rounded-3xl shadow-sm border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all text-left overflow-hidden"
+            className="group relative flex flex-col items-start p-6 bg-white rounded-3xl shadow-sm border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all text-left overflow-hidden"
           >
             <div className={`${item.color} p-4 rounded-2xl text-white mb-6 group-hover:scale-110 transition-transform`}>
               {item.icon}
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">{item.label}</h3>
-            <p className="text-slate-500 text-sm">{item.desc}</p>
-            <div className="absolute top-0 right-0 p-4 text-slate-100 group-hover:text-slate-200 transition-colors">
-              <Smartphone className="w-16 h-16 opacity-10" />
-            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">{item.label}</h3>
+            <p className="text-slate-400 text-xs font-medium leading-relaxed">{item.desc}</p>
           </button>
         ))}
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 p-8">
+      <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
         <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
           <AlertCircle className="w-5 h-5 text-amber-500" />
           Live Activity Feed
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {records.slice(0, 5).map((record, i) => (
-            <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl animate-slideUp" style={{animationDelay: `${i * 100}ms`}}>
+            <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 animate-slideUp" style={{animationDelay: `${i * 100}ms`}}>
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center font-bold text-slate-400 border border-slate-200">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center font-bold text-slate-400 border border-slate-100 shadow-sm">
                   {record.imei.slice(-2)}
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900">{record.device.model} <span className="text-slate-400 font-normal">({record.imei})</span></p>
-                  <p className="text-sm text-slate-500">{record.technician} • {record.services.join(', ')}</p>
+                  <p className="font-bold text-slate-900 leading-none mb-1">{record.device.model} <span className="text-slate-400 font-medium">({record.imei})</span></p>
+                  <p className="text-xs text-slate-500 font-medium">{record.technician} • {record.services.join(', ')}</p>
                 </div>
               </div>
               <div className="text-right">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                  record.status === 'Pending' ? 'bg-blue-100 text-blue-600' :
-                  record.status === 'Rejected' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'
+                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
+                  record.status === 'Pending' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                  record.status === 'Rejected' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'
                 }`}>
                   {record.status}
                 </span>
-                <p className="text-xs text-slate-400 mt-1">{new Date(record.createdAt).toLocaleTimeString()}</p>
+                <p className="text-[10px] text-slate-400 mt-1 font-bold">{new Date(record.createdAt).toLocaleTimeString()}</p>
               </div>
             </div>
           ))}
           {records.length === 0 && (
-            <p className="text-center py-12 text-slate-400">No activity logged in the system yet.</p>
+            <div className="text-center py-16">
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Waiting for incoming repairs...</p>
+            </div>
           )}
         </div>
       </div>
