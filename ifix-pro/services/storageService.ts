@@ -1,29 +1,44 @@
-
 import { createClient } from '@supabase/supabase-js';
-import { RepairRecord, MasterDevice, DeviceInfo } from "../types";
+import { RepairRecord, MasterDevice, DeviceInfo, InventoryItem } from "../types";
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 
-// If URL or Key is missing, the client will fail, but we prevent app crash here
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Initialize Supabase only if credentials are present
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 export const storageService = {
   getRecords: async (): Promise<RepairRecord[]> => {
-    const { data, error } = await supabase
-      .from('repair_records')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
+    if (!supabase) return [];
+    try {
+      const { data, error } = await supabase
+        .from('repair_records')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data || []).map(r => ({
+        id: r.id,
+        referenceNo: r.reference_no,
+        technician: r.technician,
+        imei: r.imei,
+        services: r.services,
+        status: r.status,
+        device: r.device,
+        createdAt: r.created_at,
+        receivedAt: r.received_at
+      }));
+    } catch (error) {
       console.error("Error fetching records:", error);
       return [];
     }
-    return data || [];
   },
 
   saveRecord: async (record: RepairRecord) => {
-    // Check if a pending record already exists to avoid duplicates
+    if (!supabase) return;
     const { data: existing } = await supabase
       .from('repair_records')
       .select('*')
@@ -42,7 +57,6 @@ export const storageService = {
       await supabase
         .from('repair_records')
         .insert([{
-          id: record.id,
           reference_no: record.referenceNo,
           technician: record.technician,
           imei: record.imei,
@@ -55,18 +69,18 @@ export const storageService = {
   },
 
   updateRecord: async (updatedRecord: RepairRecord) => {
-    const { error } = await supabase
+    if (!supabase) return;
+    await supabase
       .from('repair_records')
       .update({ 
         status: updatedRecord.status, 
         received_at: updatedRecord.receivedAt 
       })
       .eq('id', updatedRecord.id);
-    
-    if (error) console.error("Error updating record:", error);
   },
 
   getPendingByIMEIAndTech: async (imei: string, technician: string): Promise<RepairRecord | null> => {
+    if (!supabase) return null;
     const { data, error } = await supabase
       .from('repair_records')
       .select('*')
@@ -75,12 +89,24 @@ export const storageService = {
       .eq('status', 'Pending')
       .maybeSingle();
     
-    if (error) return null;
-    return data;
+    if (error || !data) return null;
+    
+    return {
+      id: data.id,
+      referenceNo: data.reference_no,
+      technician: data.technician,
+      imei: data.imei,
+      services: data.services,
+      status: data.status,
+      device: data.device,
+      createdAt: data.created_at,
+      receivedAt: data.received_at
+    };
   },
 
   saveMasterDevices: async (devices: MasterDevice[]) => {
-    const { error } = await supabase
+    if (!supabase) return;
+    await supabase
       .from('master_inventory')
       .upsert(devices.map(d => ({
         imei: d.imei,
@@ -88,27 +114,44 @@ export const storageService = {
         capacity: d.capacity,
         color: d.color
       })), { onConflict: 'imei' });
-    
-    if (error) console.error("Error saving master devices:", error);
   },
 
   getMasterInventory: async (): Promise<MasterDevice[]> => {
-    const { data, error } = await supabase
-      .from('master_inventory')
-      .select('*');
-    
-    if (error) return [];
+    if (!supabase) return [];
+    const { data } = await supabase.from('master_inventory').select('*');
     return data || [];
   },
 
   lookupDeviceInfo: async (imei: string): Promise<DeviceInfo | null> => {
-    const { data, error } = await supabase
+    if (!supabase) return null;
+    const { data } = await supabase
       .from('master_inventory')
       .select('model, capacity, color')
       .eq('imei', imei)
       .maybeSingle();
-    
-    if (error || !data) return null;
     return data;
+  },
+
+  getPartsInventory: async (): Promise<InventoryItem[]> => {
+    if (!supabase) return [];
+    try {
+      const { data } = await supabase.from('parts_inventory').select('*');
+      return data || [];
+    } catch {
+      return [];
+    }
+  },
+
+  updatePartQuantity: async (partId: string, quantity: number) => {
+    if (!supabase) return;
+    await supabase
+      .from('parts_inventory')
+      .update({ quantity })
+      .eq('id', partId);
+  },
+
+  addPart: async (part: Omit<InventoryItem, 'id'>) => {
+    if (!supabase) return;
+    await supabase.from('parts_inventory').insert([part]);
   }
 };
