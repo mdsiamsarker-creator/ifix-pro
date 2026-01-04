@@ -1,4 +1,3 @@
-
 export type RepairStatus = 'Pending' | 'Reworked' | 'Opened' | 'Closed' | 'Checked' | 'Repaired' | 'Rejected';
 
 export interface DeviceInfo {
@@ -23,21 +22,31 @@ export interface RepairRecord {
   receivedAt?: number;
 }
 
+export interface InventoryItem {
+  id: string;
+  name: string;
+  model: string;
+  quantity: number;
+  minThreshold: number;
+  category: 'Screen' | 'Battery' | 'Housing' | 'Small Parts' | 'Tools';
+}
+
 export interface Technician {
   id: string;
   name: string;
+  team: string;
 }
 
 export const TECHNICIANS: Technician[] = [
-  { id: '1', name: 'Ali+Ahmad' },
-  { id: '2', name: 'Erfan' },
-  { id: '3', name: 'Mehdi+Riduan' },
-  { id: '4', name: 'Delwar' },
-  { id: '5', name: 'Waqas' },
-  { id: '6', name: 'Rabbi' },
-  { id: '7', name: 'Yasin' },
-  { id: '8', name: 'Glass team' },
-  { id: '9', name: 'Plolish team' }
+  { id: '1', name: 'Ali+Ahmad', team: 'Main' },
+  { id: '2', name: 'Erfan', team: 'Main' },
+  { id: '3', name: 'Mehdi+Riduan', team: 'Support' },
+  { id: '4', name: 'Delwar', team: 'Main' },
+  { id: '5', name: 'Waqas', team: 'Micro-soldering' },
+  { id: '6', name: 'Rabbi', team: 'Support' },
+  { id: '7', name: 'Yasin', team: 'Support' },
+  { id: '8', name: 'Glass team', team: 'Refurbishment' },
+  { id: '9', name: 'Plolish team', team: 'Refurbishment' }
 ];
 
 export const SERVICES = [
@@ -49,7 +58,9 @@ export const SERVICES = [
   'Battery Replacement',
   'Charging Port Fix',
   'Camera Repair',
-  'Logic Board Service'
+  'Logic Board Service',
+  'Glass Refurbishment',
+  'Back Glass Laser'
 ];
 
 export enum Page {
@@ -58,5 +69,7 @@ export enum Page {
   RepairReceive = 'REPAIR_RECEIVE',
   RepairHistory = 'REPAIR_HISTORY',
   RepairData = 'REPAIR_DATA',
-  BulkUpload = 'BULK_UPLOAD'
+  BulkUpload = 'BULK_UPLOAD',
+  Inventory = 'INVENTORY',
+  Settings = 'SETTINGS'
 }
